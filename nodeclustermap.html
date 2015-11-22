@@ -23,7 +23,7 @@ var width = 3000,
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-20)
+    .charge(-80)
     .linkDistance(30)
     .size([width, height]);
 
@@ -31,7 +31,7 @@ var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-d3.json("graphPluginData.json", function(error, graph) { ////////////////////////////////////*******json file
+d3.json("graphPluginDataFriday.json", function(error, graph) { ////////////////////////////////////*******json file
   if (error) throw error;
 
   force
