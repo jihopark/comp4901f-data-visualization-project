@@ -8,6 +8,7 @@
       margin:0 auto;
       position:relative;
       width:958px;
+      font: sans-serif;
     }
     .chart rect {
       stroke: white;
@@ -29,6 +30,11 @@
   </style>
   <body>
     <h1>Communication Heat Map</h1>
+    <form id="radio-forms">
+        <input type="radio" name="day-select" value="Fri" checked>Fri</input>
+        <input type="radio" name="day-select" value="Sat">Sat</input>
+        <input type="radio" name="day-select" value="Sun">Sun</input>
+    </form>
     <div id="svg-container">
       <p class="loading">Loading Data...</p>
     </div>

@@ -1,6 +1,6 @@
 (function() {
 
-
+  var currentDay = "Fri";
   var data = {};
   var timeInterval;
 
@@ -9,7 +9,7 @@
     if (!data[day]) {
       console.log("Need to load data for " + day);
       d3.select(".loading").style("visibility", "visible");
-      d3.csv("/data/comm-data-Fri.csv", function(loaded) {
+      d3.csv("/data/comm-data-" + day + ".csv", function(loaded) {
         data[day] = loaded;
         console.log("Data Load Done. Total Row:" + data[day].length);
         countData(data[day]);
@@ -70,14 +70,11 @@
     return count;
   }
 
-  loadData("Fri", data);
-
   function render(data) {
     var array = [];
-    var locations = Object.keys(data);
+    var locations = Object.keys(data).sort();
     for (var i=0, locationNum=locations.length ; i<locationNum; i++) {
       array = array.concat(data[locations[i]]);
-      console.log(data[locations[i]]);
     }
     function cell_dim(total, cells) { return Math.floor(total/cells) }
     var total_height = 700;
@@ -150,5 +147,14 @@
       .attr("y2", 0);
     d3.select(".loading").style("visibility", "hidden");
   }
+
+
+  loadData(currentDay, data);
+  d3.select("#radio-forms").on("change", function() {
+    currentDay = d3.select('input[name="day-select"]:checked').node().value;
+    d3.select("svg").remove();
+    d3.select(".loading").style("visibility", "visible");
+    loadData(currentDay, data);
+  });
 
 })();
