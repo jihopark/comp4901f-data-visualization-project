@@ -18,6 +18,10 @@
       margin:0 auto;
     }
 
+    #scale-explanation text {
+      font: 15px sans-serif;
+    }
+
     .axis text {
       font: 10px sans-serif;
     }
@@ -29,16 +33,16 @@
     }
   </style>
   <body>
-    <h1>Communication Heat Map</h1>
+    <h1>Communication Frequency Heat Map</h1>
+    <div id="explanations"></div>
+    <div id="svg-container">
+      <p class="loading">Loading Data...</p>
+    </div>
     <form id="radio-forms">
         <input type="radio" name="day-select" value="Fri" checked>Fri</input>
         <input type="radio" name="day-select" value="Sat">Sat</input>
         <input type="radio" name="day-select" value="Sun">Sun</input>
     </form>
-    <div id="svg-container">
-      <p class="loading">Loading Data...</p>
-    </div>
-    <div id="explanations"></div>
   </body>
   <script type="text/javascript" src="heatmap.js"></script>
 </html>

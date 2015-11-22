@@ -8,7 +8,7 @@
     var fileName = "/data/comm-data-" + day + ".csv";
     if (!data[day]) {
       console.log("Need to load data for " + day);
-      d3.select(".loading").style("visibility", "visible");
+      d3.select(".loading").style("display", "inline");
       d3.csv("/data/comm-data-" + day + ".csv", function(loaded) {
         data[day] = loaded;
         console.log("Data Load Done. Total Row:" + data[day].length);
@@ -109,9 +109,9 @@
                         .attr("class", "chart")
                         .attr("width", cols*col_width + horizontal_margin*2)
                         .attr("height", rows*row_height + vertical_margin*2);
-
+    var max = d3.max(array), min = d3.min(array);
     var color = d3.scale.linear()
-                .domain([d3.min(array), d3.max(array)])
+                .domain([min, max])
                 .range(["#FFF0F0", "#8b0000"]);
 
     color_chart.selectAll("rect")
@@ -145,15 +145,49 @@
       .attr("y1", 0)
       .attr("x2", total_width)
       .attr("y2", 0);
-    d3.select(".loading").style("visibility", "hidden");
+    d3.select(".loading").style("display", "none");
+
+    var linearScale = d3.scale.linear()
+                  .domain([1,6])
+                  .range([min, max]);
+    var scaleExplanation = d3.select("#explanations")
+                        .append("svg");
+    scaleExplanation.attr("class", "scale-explanation")
+                    .attr("width", cols*col_width + horizontal_margin*2)
+                    .attr("height", 80);
+    scaleExplanation.selectAll("rect")
+                    .data([1,2,3,4,5,6].map(linearScale))
+                    .enter()
+                    .append("rect")
+                    .attr("x", function(d,i) { return i * col_width/2; })
+                    .attr("y", function(d,i) { return 0; })
+                    .attr("width", col_width/2)
+                    .attr("height", row_height)
+                    .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+                    .attr("fill", color);
+
+    var text1 = scaleExplanation.append("text");
+    var text2 = scaleExplanation.append("text");
+
+    text1.text("less")
+      .attr("x",0)
+      .attr("y",0)
+      .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+      
+    text2.text("more")
+      .attr("x",col_width*2.5)
+      .attr("y",0)
+      .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+
   }
 
 
   loadData(currentDay, data);
+
   d3.select("#radio-forms").on("change", function() {
     currentDay = d3.select('input[name="day-select"]:checked').node().value;
     d3.select("svg").remove();
-    d3.select(".loading").style("visibility", "visible");
+    d3.select(".loading").style("display", "inline");
     loadData(currentDay, data);
   });
 
