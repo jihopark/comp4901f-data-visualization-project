@@ -3,15 +3,38 @@
   <head>
     <script src="d3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="heatmap.js"></script>
+    <link rel="stylesheet" href="heatmap.css"/>
   </head>
   <body>
     <h1>Heatmap</h1>
-    <div id="container">
-      <div id="day-options">
+    <div class="days-hours-heatmap">
+      <!-- calibration and render type controller -->
+      <div class="calibration" role="calibration">
+        <div class="group" role="example">
+          <svg width="120" height="17">
+          </svg>
+          <div role="description" class="description">
+            <label>Less</label>
+            <label>More</label>
+          </div>
+        </div>
+        <div role="toggleDisplay" class="display-control">
+          <div>
+            <input type="radio" name="displayType" checked/>
+            <label>Friday</label>
+          </div>
+          <div>
+            <input type="radio" name="displayType"/>
+            <label>Saturday</label>
+          </div>
+          <div>
+            <input type="radio" name="displayType"/>
+            <label>Sunday</label>
+          </div>
+        </div>
       </div>
-      <div id="data-container">
-        
-      </div>
+      <!-- heatmap -->
+      <svg role="heatmap" class="heatmap"></svg>
     </div>
   </body>
 </html>
