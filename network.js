@@ -118,6 +118,9 @@
       }
       if (newEdge)
         d3Edges.push(D3Edge(sourceIndex, targetIndex, 1));
+
+      if (i%1000==0)    // just to keep up with the progress of algorithm
+        console.log("edges count so far = "+d3Edges.length);
     }
 
     console.log("edges count = "+d3Edges.length);
@@ -134,8 +137,8 @@
   function handleData(day){
     console.log("okay loaded!!");
     //console.log(data.Fri);
-    generateUniqueIdList(data[day], 1000);
-    generateD3Edges(data[day], 1000, uniqueIdList);
+    generateUniqueIdList(data[day], 10000);
+    generateD3Edges(data[day], 10000, uniqueIdList);
     document.getElementById("data-container").innerHTML=JSON.stringify({"nodes": uniqueIdList,"links":d3Edges})
 
   }
