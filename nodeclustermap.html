@@ -17,8 +17,8 @@
 <script src="/d3.min.js"></script>
 <script>
 
-var width = 960,
-    height = 500;
+var width = 1300,
+    height = 600;
 
 var color = d3.scale.category20();
 
@@ -43,7 +43,9 @@ d3.json("miserables.json", function(error, graph) {
       .data(graph.links)
     .enter().append("line")
       .attr("class", "link")
+      .style("stroke-linecap", "round")
       .style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
+
 
   var node = svg.selectAll(".node")
       .data(graph.nodes)
@@ -52,9 +54,8 @@ d3.json("miserables.json", function(error, graph) {
       .attr("r", function(d) { return Math.max(10 ,((d.count)*(d.count))); })         //***************** specify Node Size
       .style("fill", function(d) { return color(d.group); })  //***************** specify Color
       .call(force.drag);
-
-  node.append("title")
-      .text(function(d) { return d.name; });
+    node.append("title")
+      .text(function(d) { return "Name: "+d.name+"\nFrequency: "+d.count; });
 
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
@@ -65,6 +66,10 @@ d3.json("miserables.json", function(error, graph) {
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   });
+
+
 });
+
+
 
 </script>
