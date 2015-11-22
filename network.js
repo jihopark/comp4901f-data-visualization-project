@@ -134,8 +134,8 @@
   function handleData(day){
     console.log("okay loaded!!");
     //console.log(data.Fri);
-    generateUniqueIdList(data[day], 10);
-    generateD3Edges(data[day], 10, uniqueIdList);
+    generateUniqueIdList(data[day], 1000);
+    generateD3Edges(data[day], 1000, uniqueIdList);
     document.getElementById("data-container").innerHTML=JSON.stringify({"nodes": uniqueIdList,"links":d3Edges})
 
   }
