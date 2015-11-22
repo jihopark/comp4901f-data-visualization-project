@@ -2,39 +2,28 @@
 <html>
   <head>
     <script src="d3.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="heatmap.js"></script>
-    <link rel="stylesheet" href="heatmap.css"/>
   </head>
+  <style type="text/css">
+    body {
+      margin:0 auto;
+      position:relative;
+      width:958px;
+    }
+    .chart rect {
+      stroke: white;
+    }
+    .axis text {
+      font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+  </style>
   <body>
-    <h1>Heatmap</h1>
-    <div class="days-hours-heatmap">
-      <!-- calibration and render type controller -->
-      <div class="calibration" role="calibration">
-        <div class="group" role="example">
-          <svg width="120" height="17">
-          </svg>
-          <div role="description" class="description">
-            <label>Less</label>
-            <label>More</label>
-          </div>
-        </div>
-        <div role="toggleDisplay" class="display-control">
-          <div>
-            <input type="radio" name="displayType" checked/>
-            <label>Friday</label>
-          </div>
-          <div>
-            <input type="radio" name="displayType"/>
-            <label>Saturday</label>
-          </div>
-          <div>
-            <input type="radio" name="displayType"/>
-            <label>Sunday</label>
-          </div>
-        </div>
-      </div>
-      <!-- heatmap -->
-      <svg role="heatmap" class="heatmap"></svg>
-    </div>
   </body>
+  <script type="text/javascript" src="heatmap.js"></script>
 </html>
