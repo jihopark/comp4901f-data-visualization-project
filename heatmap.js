@@ -8,6 +8,7 @@
     var fileName = "/data/comm-data-" + day + ".csv";
     if (!data[day]) {
       console.log("Need to load data for " + day);
+      d3.select(".loading").style("visibility", "visible");
       d3.csv("/data/comm-data-Fri.csv", function(loaded) {
         data[day] = loaded;
         console.log("Data Load Done. Total Row:" + data[day].length);
@@ -16,6 +17,7 @@
     }
     else {
       console.log("Already Loaded");
+      countData(data[day]);
     }
   };
 
@@ -79,8 +81,8 @@
     }
     function cell_dim(total, cells) { return Math.floor(total/cells) }
     var total_height = 700;
-    var total_width = 500;
-    var horizontal_margin = 50, vertical_margin = 50;
+    var total_width = 400;
+    var horizontal_margin = 50, vertical_margin = 25;
     var rows = timeInterval.length-1; // 1hr split into 30 min blocks
     var cols = locations.length; //locations.length; // number of location
     var row_height = cell_dim(total_height, rows);
@@ -90,18 +92,26 @@
     var x = d3.scale.ordinal()
       .domain(locations)
       .rangeRoundPoints([0, total_width - col_width]);
+    var y = d3.time.scale()
+      .domain([timeInterval[0], timeInterval[timeInterval.length-1]])
+      .rangeRound([0, row_height*rows]);
 
     var xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom");
 
-    var svgContainer = d3.select("body")
-                        .append("svg");
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+
+    var svgContainer = d3.select("#svg-container")
+                        .append("svg")
 
     var color_chart = svgContainer
                         .attr("class", "chart")
-                        .attr("width", total_width + horizontal_margin*2)
-                        .attr("height", total_height + vertical_margin*2);
+                        .attr("width", cols*col_width + horizontal_margin*2)
+                        .attr("height", rows*row_height + vertical_margin*2);
 
     var color = d3.scale.linear()
                 .domain([d3.min(array), d3.max(array)])
@@ -115,12 +125,18 @@
               .attr("y", function(d,i) { return i % rows * row_height; })
               .attr("width", col_width)
               .attr("height", row_height)
+              .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
               .attr("fill", color);
 
     var xAxisGroup = color_chart.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate(0," + rows*row_height + ")")
+        .attr("transform", "translate("+ horizontal_margin + "," + (rows*row_height + vertical_margin) + ")")
         .call(xAxis);
+
+    var yAxisGroup = color_chart.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+        .call(yAxis);
 
     xAxisGroup.selectAll(".tick text")
       .style("text-anchor", "start")
@@ -132,9 +148,7 @@
       .attr("y1", 0)
       .attr("x2", total_width)
       .attr("y2", 0);
-
-
-
-    }
+    d3.select(".loading").style("visibility", "hidden");
+  }
 
 })();

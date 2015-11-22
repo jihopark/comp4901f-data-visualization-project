@@ -12,10 +12,14 @@
     .chart rect {
       stroke: white;
     }
+
+    #svg-container {
+      margin:0 auto;
+    }
+
     .axis text {
       font: 10px sans-serif;
     }
-
     .axis path,
     .axis line {
       fill: none;
@@ -24,6 +28,11 @@
     }
   </style>
   <body>
+    <h1>Communication Heat Map</h1>
+    <div id="svg-container">
+      <p class="loading">Loading Data...</p>
+    </div>
+    <div id="explanations"></div>
   </body>
   <script type="text/javascript" src="heatmap.js"></script>
 </html>
