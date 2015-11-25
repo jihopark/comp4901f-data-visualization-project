@@ -77,28 +77,29 @@
       array = array.concat(data[locations[i]]);
     }
     function cell_dim(total, cells) { return Math.floor(total/cells) }
-    var total_height = 700;
-    var total_width = 400;
-    var horizontal_margin = 50, vertical_margin = 25;
-    var rows = timeInterval.length-1; // 1hr split into 30 min blocks
-    var cols = locations.length; //locations.length; // number of location
+    var total_height = 400;
+    var total_width = 700;
+    var horizontal_margin = 100, vertical_margin = 25;
+    var cols = timeInterval.length-1; // 1hr split into 30 min blocks
+    var rows = locations.length; //locations.length; // number of location
     var row_height = cell_dim(total_height, rows);
     var col_width = cell_dim(total_width, cols);
 
 
-    var x = d3.scale.ordinal()
+    var location_scale = d3.scale.ordinal()
       .domain(locations)
-      .rangeRoundPoints([0, total_width - col_width]);
-    var y = d3.time.scale()
+      .rangeRoundPoints([0, total_height - row_height]);
+
+    var time_scale = d3.time.scale()
       .domain([timeInterval[0], timeInterval[timeInterval.length-1]])
-      .rangeRound([0, row_height*rows]);
+      .rangeRound([0, col_width*cols]);
 
     var xAxis = d3.svg.axis()
-        .scale(x)
+        .scale(time_scale)
         .orient("bottom");
 
     var yAxis = d3.svg.axis()
-        .scale(y)
+        .scale(location_scale)
         .orient("left");
 
 
@@ -118,8 +119,8 @@
               .data(array)
               .enter()
               .append("rect")
-              .attr("x", function(d,i) { return Math.floor(i / rows) * col_width; })
-              .attr("y", function(d,i) { return i % rows * row_height; })
+              .attr("y", function(d,i) { return Math.floor(i / cols) * row_height; })
+              .attr("x", function(d,i) { return i % cols * col_width; })
               .attr("width", col_width)
               .attr("height", row_height)
               .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
@@ -127,12 +128,12 @@
 
     var xAxisGroup = color_chart.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate("+ horizontal_margin + "," + (rows*row_height + vertical_margin) + ")")
+        .attr("transform", "translate("+ horizontal_margin + "," + (vertical_margin-15) + ")")
         .call(xAxis);
 
     var yAxisGroup = color_chart.append("g")
         .attr("class", "y axis")
-        .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+        .attr("transform", "translate("+ horizontal_margin + "," + (row_height/2 + vertical_margin) + ")")
         .call(yAxis);
 
     xAxisGroup.selectAll(".tick text")
@@ -140,11 +141,6 @@
       .attr("x", 6)
       .attr("y", 6);
 
-    xAxisGroup.append("line")
-      .attr("x1", 0)
-      .attr("y1", 0)
-      .attr("x2", total_width)
-      .attr("y2", 0);
     d3.select(".loading").style("display", "none");
 
     var linearScale = d3.scale.linear()
@@ -173,7 +169,7 @@
       .attr("x",0)
       .attr("y",0)
       .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
-      
+
     text2.text("more")
       .attr("x",col_width*2.5)
       .attr("y",0)
@@ -186,7 +182,8 @@
 
   d3.select("#radio-forms").on("change", function() {
     currentDay = d3.select('input[name="day-select"]:checked').node().value;
-    d3.select("svg").remove();
+    d3.select(".chart").remove();
+    d3.select("#explanations").remove();
     d3.select(".loading").style("display", "inline");
     loadData(currentDay, data);
   });
