@@ -5,6 +5,7 @@
 
   var uniqueIdList = [];
   var d3Edges = [];
+  var groups = [];
 
 
   // @input param = data
@@ -32,7 +33,10 @@
 
     // for each row in table
     for (var i=0; i<dataRange; ++i) {
-
+      if (data[i].to==="external") {
+        //console.log("external ignored");
+        continue;
+      }
       var isIdUnique = true;
       // identify unique IDs by source from call source
       for (var j=0; j<uniqueIdList.length; ++j){
@@ -84,10 +88,14 @@
                       };
       return retObject;
     }
-    console.log(data);
+    //console.log(data);
 
     for (var i=0; i<dataRange; ++i)
     {
+      if (data[i].to==="external") {
+        //console.log("external ignored");
+        continue;
+      }
       // find source index
       var sourceIndex = -1;
       for (var j=0; j<visitorList.length; ++j){
@@ -131,14 +139,74 @@
 
   }
 
+  function generateGroupings(data, dataRange, visitorList) {
+    function Group(idString) {
+      var retObject = {
+                        idList: [idString],
+                        frequency: 0   //aggregate communication frequency
+                      }
+      return retObject;
+    }
 
+    // initialize list of groupings
+    for (var i=0; i<visitorList.length; ++i) {
+      groups.push(Group(visitorList[i].id));
+    }
+    console.log(groups);
+
+    for (var i=0; i<dataRange; ++i) {
+      var sameGroup = true;
+      var senderGroup = -1;
+      var recepientGroup = -1;
+      if (data[i].to==="external") {
+        // ignore all extern recepients
+        //console.log("ignore extern");
+        continue;
+      }
+
+      for (var j=0; j<groups.length; ++j) {
+        for (var k=0; k<groups[j].idList.length; ++k) {
+          if (groups[j].idList[k]===data[i].from) {
+            senderGroup = j;
+          }
+          if (groups[j].idList[k]===data[i].to) {
+            recepientGroup = j;
+          }
+        }
+      }
+      if (senderGroup==-1 || recepientGroup==-1) {
+        console.log("ERROR in finding visitor ID, terminating..");
+        break;
+      }
+      if (senderGroup!=recepientGroup) {
+        //console.log(data[i].from+", "+data[i].to+" joins group "+senderGroup+" and "+recepientGroup);
+        var groupsTemp = groups[recepientGroup];
+        for (var j=0; j<groupsTemp.idList.length; ++j) {
+          groups[senderGroup].idList.push(groupsTemp.idList[j]);
+        }
+
+        groups[senderGroup].frequency+=1; // add to frequency
+        groups[senderGroup].frequency+=groups[recepientGroup].frequency; // add to frequency
+        groups.splice(recepientGroup,1);
+      }
+      else {
+        groups[senderGroup].frequency+=1; // add to frequency
+      }
+
+      if (i%1000==0)    // just to keep up with the progress of algorithm
+        console.log("groups count so far = "+groups.length);
+    }
+
+
+  }
 
   // callback function after loading is done. This function manages {data} from loadData()
   function handleData(day){
     console.log("okay loaded!!");
     //console.log(data.Fri);
-    generateUniqueIdList(data[day], 10000);
-    generateD3Edges(data[day], 10000, uniqueIdList);
+    generateUniqueIdList(data[day], 10);//data[day].length);
+    generateD3Edges(data[day], 10, uniqueIdList);
+    generateGroupings(data[day], 10, uniqueIdList);
     document.getElementById("data-container").innerHTML=JSON.stringify({"nodes": uniqueIdList,"links":d3Edges})
 
   }
