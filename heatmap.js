@@ -1,6 +1,6 @@
 (function() {
 
-  var currentDay = "Fri";
+  var currentDay = "Sun";
   var data = {};
   var timeInterval;
 
@@ -23,6 +23,7 @@
 
   function countData(data) {
     var locationMap = {};
+    var peopleCount = {};
 
     //Sort data according to location
     data.forEach(function(row){
@@ -43,9 +44,12 @@
     });
     for (var i=0, locationNum=Object.keys(locationMap).length ; i<locationNum; i++) {
       var key = Object.keys(locationMap)[i];
+      peopleCount[key] = countUniqueCallersTimeInterval(locationMap[key]);
       locationMap[key] = countTimeInterval(locationMap[key]);
     }
-    render(locationMap);
+    console.log("peopleCount");
+    console.log(peopleCount);
+    render(locationMap, peopleCount);
   }
 
   function countTimeInterval(data) {
@@ -67,15 +71,67 @@
           count[j]++;
       }
     }
+    console.log("countTimeInterval");
+    console.log(count);
     return count;
   }
 
-  function render(data) {
+  function countUniqueCallersTimeInterval(data) {
+    var count = [];
+    var uniqueIdList = [];
+
+    var start = d3.time.day(new Date(data[0]["Timestamp"]));
+    timeInterval = d3.time.minute.range(d3.time.hour.offset(start, 8), d3.time.minute.offset(start, 1470), 30);
+
+    for (var i=0;i<timeInterval.length-1;i++) {
+      count[i] = 0;
+      uniqueIdList[i] = [];
+    }
+
+    var intervalStart, intervalEnd;
+    for (var i=0;i<data.length;i++){
+      for (var j=0;j<timeInterval.length-1;j++) {
+        intervalStart = timeInterval[j];
+        intervalEnd = timeInterval[j+1];
+        var time = new Date(data[i]["Timestamp"]);
+        if (time >= intervalStart && time <= intervalEnd) {
+          //count[j]++;
+          var isUnique = true;
+          for (var k=0; k<uniqueIdList[j].length; ++k) {
+            if (data[i]["from"]===uniqueIdList[j][k]) {
+              isUnique = false;
+            }
+          }
+          if (isUnique)
+            uniqueIdList[j].push(data[i]["from"]);
+        }
+      }
+    }
+    console.log("countUniqueCallers");
+
+    for (var i=0; i<uniqueIdList.length; ++i) {
+      count[i] = uniqueIdList[i].length;
+    }
+    console.log(count);
+    return count;
+
+  }
+
+  function render(data, blueData) {
     var array = [];
+    var blueArray = [];
+
     var locations = Object.keys(data).sort();
     for (var i=0, locationNum=locations.length ; i<locationNum; i++) {
       array = array.concat(data[locations[i]]);
+      blueArray = blueArray.concat(blueData[locations[i]]);
     }
+    for (var i=0; i<array.length; ++i) {
+      blueArray[i] = parseInt(array[i]) / parseInt(blueArray[i]);
+    }
+    console.log("blueArray");
+    console.log(blueArray);
+
     function cell_dim(total, cells) { return Math.floor(total/cells) }
     var total_height = 400;
     var total_width = 700;
@@ -106,15 +162,72 @@
     var svgContainer = d3.select("#svg-container")
                         .append("svg")
 
+    var blueSvgContainer = d3.select("#svg-container")
+                        .append("svg")
+
+    var blue_color_chart = blueSvgContainer
+                        .attr("class", "chart")
+                        .attr("width", cols*col_width + horizontal_margin*2)
+                        .attr("height", rows*row_height + vertical_margin*2);
+
     var color_chart = svgContainer
                         .attr("class", "chart")
                         .attr("width", cols*col_width + horizontal_margin*2)
                         .attr("height", rows*row_height + vertical_margin*2);
+
+
     var max = d3.max(array), min = d3.min(array);
+    var blueMax = d3.max(blueArray), blueMin = d3.min(blueArray);
     var color = d3.scale.linear()
                 .domain([min, max])
-                .range(["#FFF0F0", "#8b0000"]);
+                .range(["#FFFAFA", "#CC0000"]);
 
+    // blue color
+    var blueColor = d3.scale.linear()
+                .domain([blueMin, blueMax])
+                .range(["#FAFAFF", "#0000CC"]);
+    // first row = array1, second row = array2 and so on.
+    function mixByRow(arr1, arr2, cols) {
+      var output = [];
+      // for each row of arr1 and arr2
+      for (var i=0; i<(array.length/cols); ++i) {
+        console.log ("row "+i);
+        // first row = red, second row = blue
+        for (var j=0; j<cols; ++j) {
+          output.push(arr1[i*cols+j]);
+        }
+        for (var j=0; j<cols; ++j) {
+          output.push(arr2[i*cols+j]);
+        }
+      }
+      return output;
+    }
+
+    var arrayForNewHeatmap = mixByRow(array, blueArray, cols);
+    console.log(arrayForNewHeatmap);
+    //console.log(array);
+    color_chart.selectAll("rect")
+              .data(arrayForNewHeatmap)
+              .enter()
+              .append("rect")
+              .attr("y", function(d,i) { return Math.floor(i / cols) * (row_height/2); })
+              .attr("x", function(d,i) { return i % cols * col_width; })
+              .attr("width", col_width)
+              .attr("height", function(d,i) {if((Math.floor(i/cols))%2==0){return row_height/2}else{return row_height/2.4}})
+              .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
+              .attr("fill", function(d,i) {
+                //console.log(d);
+                //console.log("max "+max);
+                //console.log(Math.floor(i/cols)+"th row");
+                if ((Math.floor(i/cols))%2==0) {
+                  return color(d);
+                }
+                else {
+                  return blueColor(d);
+                }
+              });
+
+/*
     color_chart.selectAll("rect")
               .data(array)
               .enter()
@@ -122,10 +235,10 @@
               .attr("y", function(d,i) { return Math.floor(i / cols) * row_height; })
               .attr("x", function(d,i) { return i % cols * col_width; })
               .attr("width", col_width)
-              .attr("height", row_height)
+              .attr("height", row_height/2)
               .attr("transform", "translate("+ horizontal_margin + "," + vertical_margin + ")")
               .attr("fill", color);
-
+*/
     var xAxisGroup = color_chart.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate("+ horizontal_margin + "," + (vertical_margin-15) + ")")
