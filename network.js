@@ -12,18 +12,22 @@
   // @output = uniqueIdList = visitorList
   function generateUniqueIdList(data, dataRange)
   {
-    function VisitorObject(id,firstSeen,isSender, location){
+    function VisitorObject(id,firstSeen,isSender, location, to){
       var retObject = {
                         id: id,
                         firstSeen: firstSeen, //timestamp
                         lastSeen: firstSeen,  //timestamp
                         sendFrequency: 0,
                         receiveFrequency: 0,
+                        sendIdList: [],
+                        sendIdCount: 0,
                         sendLocationFrequency: {"Kiddie Land": 0, "Entry Corridor": 0, "Tundra Land": 0, "Wet Land": 0, "Coaster Alley": 0}
                       };
       if (isSender) {
         retObject.sendFrequency = 1;
         retObject.sendLocationFrequency[location] = 1;
+        retObject.sendIdList.push(to);
+        retObject.sendIdCount=1;
       }
       else {
         retObject.receiveFrequency = 1;
@@ -45,12 +49,25 @@
           uniqueIdList[j]["lastSeen"] = data[i].Timestamp;
           uniqueIdList[j]["sendFrequency"] +=1;
           uniqueIdList[j]["sendLocationFrequency"][data[i].location] +=1;
+          // push to sendIdList, if it is unique
+          isSendIdUnique=true;
+          for (var k=0; k<uniqueIdList[j]["sendIdList"].length; ++k) {
+            if(uniqueIdList[j]["sendIdList"][k]===data[i].to) {
+              isSendIdUnique=false;
+              break;
+            }
+          }
+          if (isSendIdUnique) {
+            uniqueIdList[j]["sendIdList"].push(data[i].to);
+            uniqueIdList[j]["sendIdCount"]+=1;
+          }
+
           break;
         }
       }
       if (isIdUnique) {
         // register as sender
-        uniqueIdList.push(VisitorObject(data[i].from, data[i].Timestamp, true, data[i].location));
+        uniqueIdList.push(VisitorObject(data[i].from, data[i].Timestamp, true, data[i].location, data[i].to));
       }
 
       isIdUnique = true;
@@ -204,9 +221,9 @@
   function handleData(day){
     console.log("okay loaded!!");
     //console.log(data.Fri);
-    generateUniqueIdList(data[day], 10);//data[day].length);
-    generateD3Edges(data[day], 10, uniqueIdList);
-    generateGroupings(data[day], 10, uniqueIdList);
+    generateUniqueIdList(data[day], 2);//data[day].length);
+    //generateD3Edges(data[day], data[day].length, uniqueIdList);
+    generateGroupings(data[day], 2, uniqueIdList);
     document.getElementById("data-container").innerHTML=JSON.stringify({"nodes": uniqueIdList,"links":d3Edges})
 
   }
@@ -215,7 +232,7 @@
     var fileName = "/data/comm-data-" + day + ".csv";
     if (!data[day]) {
       console.log("Need to load data for " + day);
-      d3.csv("/data/comm-data-Fri.csv", function(loaded) {
+      d3.csv("/data/comm-data-"+day+".csv", function(loaded) {
         data[day] = loaded;
         console.log("Data Load Done. Total Row:" + data[day].length);
         callback(day);
