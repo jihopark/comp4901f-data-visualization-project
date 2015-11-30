@@ -23,15 +23,15 @@ var width = 3000,
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-80)
-    .linkDistance(30)
+    .charge(-30)
+    .linkDistance(100)
     .size([width, height]);
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-d3.json("graphPluginDataFriday.json", function(error, graph) { ////////////////////////////////////*******json file
+d3.json("freqOver2000.json", function(error, graph) { ////////////////////////////////////*******json file
   if (error) throw error;
 
   force
@@ -66,7 +66,7 @@ d3.json("graphPluginDataFriday.json", function(error, graph) { /////////////////
         
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
-    
+  
     /*
     var q = d3.geom.quadtree(nodes),
       i = 0,
