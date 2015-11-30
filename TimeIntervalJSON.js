@@ -5,16 +5,19 @@
 
   var uniqueIdList = [];
   var d3Edges = [];
-
+  var dayStart = d3.time.day(new Date(data[0]["Timestamp"]));
+  var startTime = d3.time.minute.offset(dayStart, 600);
+  var endTime = d3.time.minute.offset(dayStart, 690);
 
   // @input param = data
   // @output = uniqueIdList = visitorList
   function generateUniqueIdList(data, dataRange)
   {
 
-  	var dayStart = d3.time.day(new Date(data[0]["Timestamp"]));
-  	var startTime = d3.time.minute.offset(dayStart, 600);
-  	var endTime = d3.time.minute.offset(dayStart, 690);
+
+  	//console.log("startTime: "+startTime);
+  	//console.log("endTime: "+endTime);
+
     function VisitorObject(id,firstSeen,isSender, location){
       var retObject = {
                         id: id,
@@ -39,6 +42,8 @@
 
       var isIdUnique = true;
       var isNOTInInterval=false;
+	  var curTime = new Date(data[i]["Timestamp"]);
+	    //console.log("CurTime: "+curTime);
 
       // identify unique IDs by source from call source
       for (var j=0; j<uniqueIdList.length; ++j){
@@ -52,8 +57,9 @@
       }
       if (isIdUnique) {
         // register as sender
-        
-          if(data[i].Timestamp < startTime || data[i].Timestamp > endTime){
+        //console.log("Time: "+data[i].Timestamp);
+          if(curTime < startTime  || curTime > endTime){
+          	//console.log("not in interval");
             isNOTInInterval=true;
           }
         if(isNOTInInterval==false){
@@ -75,7 +81,7 @@
       if (isIdUnique) {
         // register as recipient
         isNOTInInterval=false;
-          if(data[i].Timestamp < startTime || data[i].Timestamp > endTime){
+          if(curTime < startTime  || curTime > endTime){
             isNOTInInterval=true;
           }
         if(!isNOTInInterval){
@@ -108,37 +114,41 @@
 
     for (var i=0; i<dataRange; ++i)
     {
+	  var curTime = new Date(data[i]["Timestamp"]);
+
       // find source index
       var sourceIndex = -1;
-      for (var j=0; j<visitorList.length; ++j){
-        if (data[i].from===visitorList[j].id)
-          sourceIndex = j;
-      }
+      if(startTime < curTime && curTime <endTime){
+	      for (var j=0; j<visitorList.length; ++j){
+	        if (data[i].from===visitorList[j].id)
+	          sourceIndex = j;
+	      }
 
-      // find target index
-      var targetIndex = -1;
-      for (var j=0; j<visitorList.length; ++j){
-        if (data[i].to===visitorList[j].id)
-          targetIndex = j;
-      }
+	      // find target index
+	      var targetIndex = -1;
+	      for (var j=0; j<visitorList.length; ++j){
+	        if (data[i].to===visitorList[j].id)
+	          targetIndex = j;
+	      }
 
-      // no such edge found
-      if (sourceIndex==-1 || targetIndex==-1)
-        continue;
+	      // no such edge found
+	      if (sourceIndex==-1 || targetIndex==-1)
+	        continue;
 
-      // check for duplicate source & target
-      var newEdge = true;
-      for (var j=0; j<d3Edges.length; ++j){
-        if (d3Edges[j].source == sourceIndex && d3Edges[j].target == targetIndex
-          || d3Edges[j].source == targetIndex && d3Edges[j].target == sourceIndex) {
-          newEdge = false;
-          d3Edges[j]["frequency"] +=1;
-          break;
-        }
-      }
-      if (newEdge)
-        d3Edges.push(D3Edge(sourceIndex, targetIndex, 1));
-
+	      // check for duplicate source & target
+	      var newEdge = true;
+	      for (var j=0; j<d3Edges.length; ++j){
+	        if (d3Edges[j].source == sourceIndex && d3Edges[j].target == targetIndex
+	          || d3Edges[j].source == targetIndex && d3Edges[j].target == sourceIndex) {
+	          newEdge = false;
+	          d3Edges[j]["frequency"] +=1;
+	          break;
+	        }
+	      }
+	      if (newEdge)
+	        d3Edges.push(D3Edge(sourceIndex, targetIndex, 1));
+	  }
+	  
       if (i%1000==0)    // just to keep up with the progress of algorithm
         console.log("edges count so far = "+d3Edges.length);
     }
@@ -167,7 +177,7 @@
     var fileName = "/data/comm-data-" + day + ".csv";
     if (!data[day]) {
       console.log("Need to load data for " + day);
-      d3.csv("/data/comm-data-Fri.csv", function(loaded) {
+      d3.csv("/data/comm-data-Sun.csv", function(loaded) {	//////////////////////////////////Day Data
         data[day] = loaded;
         console.log("Data Load Done. Total Row:" + data[day].length);
         callback(day);
