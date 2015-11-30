@@ -1,6 +1,6 @@
 (function() {
 
-  var currentDay = "Sun";
+  var currentDay = "Fri";
   var data = {};
   var timeInterval;
 
@@ -129,6 +129,8 @@
     for (var i=0; i<array.length; ++i) {
       blueArray[i] = parseInt(array[i]) / parseInt(blueArray[i]);
     }
+    console.log("array");
+    console.log(array);
     console.log("blueArray");
     console.log(blueArray);
 
@@ -177,9 +179,10 @@
 
 
     var max = d3.max(array), min = d3.min(array);
+    console.log("SUM OF ALL ARRAYS= "+d3.sum(array));
     var blueMax = d3.max(blueArray), blueMin = d3.min(blueArray);
     var color = d3.scale.linear()
-                .domain([min, max])
+                .domain([0, 50000])
                 .range(["#FFFAFA", "#CC0000"]);
 
     // blue color
