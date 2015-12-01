@@ -8,14 +8,81 @@
     console.log(nodes);
     console.log("edges count = "+edges.length);
     console.log(edges);
+
+
+    var width = 3000,
+    height = 1500;
+
+  var color = d3.scale.category20();
+
+var force = d3.layout.force()
+    .charge(-30)
+    .linkDistance(100)
+    .size([width, height]);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+    force
+      .nodes(nodes)
+      .links(edges)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(edges)
+    .enter().append("line")
+      .attr("class", "link")
+      .style("stroke-linecap", "round")
+      .style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
+
+
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", function(d) { return Math.log((d.sendFrequency)+(d.receiveFrequency))*3; })         //***************** specify Node Size
+      .style("fill", function(d) { return color(1); })  //***************** specify Color d.group
+      .call(force.drag);
+    node.append("title")
+      .text(function(d) { return "ID: "+d.id+"\nsendFrequency: "+d.sendFrequency+"\nreceiveFrequency: "+d.receiveFrequency; });
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+        
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+  
+  });
   }
 
   // TODO: this is just an example usage
   //function generateGraph(data, startTime, endTime, idList, locationList, callback)
   function dataHandler() {
-    generateGraph(data["Fri"], data["Fri"][1000]["Timestamp"], data["Fri"][2000]["Timestamp"], ["external"], null, renderGraph);
+    ///////////////////////////////
+    var DAY="Sun";
+    
+    var startTimeHr=10;
+    var startTimeMin=0;
+    var endTimeHr=11;
+    var endTimeMin=30;
+
+    var idList=null;
+    var locationList=["Wet Land"];
+    ////////////////////////////////
+    
+    var dayStart = d3.time.day(new Date(data[DAY][0]["Timestamp"]));
+    var startTime = d3.time.minute.offset(dayStart, (startTimeHr *60 + startTimeMin));
+    var endTime = d3.time.minute.offset(dayStart, (endTimeHr *60 + endTimeMin));
+    
+    
+    generateGraph(data[DAY], startTime, endTime, idList, locationList, renderGraph);
     // or
-    //generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][10]["Timestamp"], null, null, renderGraph);
+    //generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][10]["Timestamp"], null, null, renderGraph);
   }
 
 
@@ -91,14 +158,17 @@
 
     //console.log("StartTime = "+new Date(startTime));
     var indexOnStartTime = 0;
-    while ((new Date(data[indexOnStartTime]["Timestamp"])).getTime()<(new Date(startTime)).getTime()) {
+    while ((new Date(data[indexOnStartTime]["Timestamp"]))<startTime) {
+      console.log("indexOnStart");
       indexOnStartTime++;
     }
+    console.log(new Date(data[indexOnStartTime]["Timestamp"]));
     var indexOnEndTime = indexOnStartTime;
-    while ((new Date(data[indexOnEndTime]["Timestamp"])).getTime()<=(new Date(endTime)).getTime()) {
+    while ((new Date(data[indexOnEndTime]["Timestamp"]))<=endTime) {
+      console.log("indexOnEnd");
       indexOnEndTime++;
     }
-
+    console.log(new Date(data[indexOnEndTime]["Timestamp"]));
     //console.log("indexOnStartTime = "+indexOnStartTime);
     //console.log("indexOnEndTime = "+indexOnEndTime);
 
