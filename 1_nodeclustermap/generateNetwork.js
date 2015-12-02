@@ -41,7 +41,7 @@ var svg = d3.select("body").append("svg")
       .data(nodes)
     .enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return Math.log((d.sendFrequency)+(d.receiveFrequency))*3; })         //***************** specify Node Size
+      .attr("r", function(d) { return ((d.sendFrequency)+(d.receiveFrequency))*((d.sendFrequency)+(d.receiveFrequency)); })         //***************** specify Node Size
       .style("fill", function(d) { return color(1); })  //***************** specify Color d.group
       .call(force.drag);
     node.append("title")
