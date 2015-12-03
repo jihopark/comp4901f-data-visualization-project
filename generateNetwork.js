@@ -16,11 +16,80 @@
     generateGraph(data["Fri"], data["Fri"][1000]["Timestamp"], data["Fri"][2000]["Timestamp"], ["1075494"], ["Wet Land", "Coaster Alley"], renderGraph);
     // or
     generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][10]["Timestamp"], null, null, renderGraph);
+    generateGraph(data["Sat"], data["Sat"][0]["Timestamp"], data["Sat"][data["Sat"].length-1]["Timestamp"], ["external"], null, sortByFrequency);
+    /*generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][data["Fri"].length-1]["Timestamp"], null, null, friday);
+    generateGraph(data["Sat"], data["Sat"][0]["Timestamp"], data["Sat"][data["Sat"].length-1]["Timestamp"], null, null, saturday);
+    generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][data["Sun"].length-1]["Timestamp"], null, null, sunday);*/
   }
 
 
+  function sortByFrequency(nodes, edges) {
+    console.log("sortByFrequency");
+    console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+    nodes.sort(function (a,b) {
+      return b.sendFrequency - a.sendFrequency;
 
+    })
+    console.log("sorted nodes count = "+nodes.length);
+    console.log(nodes);
+  }
 
+  var fridayNodes = [];
+  var saturdayNodes = [];
+  var sundayNodes = [];
+  var commonIdList = [];
+
+  function friday(nodes, edges) {
+    fridayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+  }
+  function saturday(nodes, edges) {
+    saturdayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+  }
+  function sunday(nodes, edges) {
+    sundayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+    computeCommonIds();
+  }
+
+  function computeCommonIds() {
+    for (var i=0; i<fridayNodes.length; ++i) {
+      var appearOnSaturday = false;
+      var appearOnSunday = false;
+      // look for same node in saturday
+      for (var j=0; j<saturdayNodes.length; ++j) {
+        if (fridayNodes[i].id === saturdayNodes[j].id) {
+          appearOnSaturday = true;
+          break;
+        }
+      }
+
+      // look for same node in sunday
+      for (var j=0; j<sundayNodes.length; ++j) {
+        if (fridayNodes[i].id === sundayNodes[j].id) {
+          appearOnSunday = true;
+          break;
+        }
+      }
+
+      if (appearOnSaturday==true && appearOnSunday==true) {
+        commonIdList.push(fridayNodes[i].id);
+      }
+
+    }
+    console.log(commonIdList);
+    document.getElementById("data-container").innerHTML=JSON.stringify(commonIdList)
+  }
 
 
 
@@ -95,7 +164,7 @@
       indexOnStartTime++;
     }
     var indexOnEndTime = indexOnStartTime;
-    while ((new Date(data[indexOnEndTime]["Timestamp"])).getTime()<=(new Date(endTime)).getTime()) {
+    while (data[indexOnEndTime] && (new Date(data[indexOnEndTime]["Timestamp"])).getTime()<=(new Date(endTime)).getTime()) {
       indexOnEndTime++;
     }
 
@@ -164,8 +233,8 @@
         nodes.push(VisitorObject(data[i].to, data[i].Timestamp, false, data[i].location));
       }
 
-      //if (i%1000==0)    // just to keep up with the progress of algorithm
-      //  console.log("nodes count so far = "+nodes.length);
+      if (i%10000==0)    // just to keep up with the progress of algorithm
+        console.log("nodes count so far = "+nodes.length);
     }
     //console.log("nodes count = "+nodes.length);
     //console.log(nodes);
@@ -243,8 +312,8 @@
       if (newEdge)
         edges.push(D3Edge(sourceIndex, targetIndex, 1));
 
-      //if (i%1000==0)    // just to keep up with the progress of algorithm
-      //  console.log("edges count so far = "+d3Edges.length);
+      if (i%10000==0)    // just to keep up with the progress of algorithm
+        console.log("edges count so far = "+edges.length);
     }
 
     //console.log("edges count = "+edges.length);
