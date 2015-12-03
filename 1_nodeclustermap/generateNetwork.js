@@ -13,7 +13,11 @@
     var width = 2000,
     height = 1500;
 
-  var color = d3.scale.category20();
+  function colores(n) {
+    var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+    return colores_g[n % colores_g.length];
+  }
+
 
 var force = d3.layout.force()
     .charge(-40)
@@ -23,8 +27,7 @@ var force = d3.layout.force()
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", height)
-    .on("dblclick", threshold);
+    .attr("height", height);
 
     force
       .nodes(nodes)
@@ -36,7 +39,7 @@ var svg = d3.select("body").append("svg")
     .enter().append("line")
       .attr("class", "link")
       //.style("stroke-linecap", "round")
-      
+
       //.style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
 
 
@@ -45,7 +48,7 @@ var svg = d3.select("body").append("svg")
     .enter().append("circle")
       .attr("class", "node")
       .attr("r", function(d) { return Math.sqrt((d.sendFrequency)+(d.receiveFrequency)); })         //***************** specify Node Size
-      .style("fill", color(3))  //***************** specify Color d.group
+      .style("fill", colores(0))  //***************** specify Color d.group
       .call(force.drag);
     node.append("title")
       .text(function(d) { return "ID: "+d.id+"\nsendFrequency: "+d.sendFrequency+"\nreceiveFrequency: "+d.receiveFrequency; });
@@ -56,21 +59,22 @@ var svg = d3.select("body").append("svg")
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-        
+
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
-  
+
   });
 
     //adjust threshold
-  function threshold(thresh) {
+  d3.select("#thresholdSlider").on("change", function(thresh) {
     console.log("THRESHOLD");
       var temp_edges = edges.splice(0, edges.length);
       for (var i = 0; i < temp_edges.length; i++) {
         if (temp_edges[i].frequency > thresh) {edges.push(temp_edges[i]);}
       }
       restart();
-  }
+  });
+
   //Restart the visualisation after any node and link changes
   function restart() {
     console.log("Restart");
@@ -88,7 +92,7 @@ var svg = d3.select("body").append("svg")
   function dataHandler() {
     ///////////////////////////////
     var DAY="Fri";
-    
+
     var startTimeHr=8;
     var startTimeMin=0;
     var endTimeHr=8;
@@ -98,12 +102,12 @@ var svg = d3.select("body").append("svg")
     var locationList=null;
     var exclusionList=null;
     ////////////////////////////////
-    
+
     var dayStart = d3.time.day(new Date(data[DAY][0]["Timestamp"]));
     var startTime = d3.time.minute.offset(dayStart, (startTimeHr *60 + startTimeMin));
     var endTime = d3.time.minute.offset(dayStart, (endTimeHr *60 + endTimeMin));
-    
-    
+
+
     generateGraph(data[DAY], startTime, endTime, idList, exclusionList, locationList, renderGraph);
     // or
     //generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][10]["Timestamp"], null, null, renderGraph);
