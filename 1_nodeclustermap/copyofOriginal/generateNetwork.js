@@ -67,14 +67,14 @@ var svg = d3.select("body").append("svg")
     ///////////////////////////////
     var DAY="Sun";
     
-    var startTimeHr=10;
+    var startTimeHr=8;
     var startTimeMin=0;
-    var endTimeHr=11;
-    var endTimeMin=30;
+    var endTimeHr=23;
+    var endTimeMin=59;
 
-    var idList=null;
+    var idList=['839736','1278894'];
     var locationList=null;
-    var exclusionList=['839736','1278894','external'];
+    var exclusionList=null;
     ////////////////////////////////
     
     var dayStart = d3.time.day(new Date(data[DAY][0]["Timestamp"]));
@@ -180,8 +180,8 @@ var svg = d3.select("body").append("svg")
       // filter out data by idList and locationList
       if(exclusionList){
         var exclusionFound = false;
-        for(var j=0; j<exclusionList.length; ++j){
-          if(exclusionList[j]===data[i].from || exclusionList[j]===data[i].to){
+        for(var j=0; j<exlusionList.length; ++j){
+          if(exlusionList[j]===data[i].from || exclusionList[j]===data[i].to){
             exclusionFound=true;
             break;
           }
