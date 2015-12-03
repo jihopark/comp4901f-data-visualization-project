@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<style>
+<style type="text/css">
 
 .node {
   stroke: #fff;
@@ -12,17 +12,50 @@
   stroke-opacity: .6;
 }
 
+body {
+  margin:0 auto;
+  position:relative;
+  width:958px;
+  font: sans-serif;
+}
+.chart rect {
+  stroke: white;
+}
+
+#svg-container {
+  margin:0 auto;
+}
+
+#scale-explanation text {
+  font: 15px sans-serif;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
 </style>
   <head>
     <script src="d3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="generateNetwork.js"></script>
   </head>
   <body>
+    <h1>Communication Node Cluster Map
+    </h1>
+    <form>
+    <h3> Link threshold 0 <input type="range" id="thresholdSlider" name="points" value = 0 min="0" max="1000" onchange="threshold(this.value)"> 1000 
+    </h3>
+  </form>
     <div id="container">
       <div id="day-options">
       </div>
       <div id="data-container">
-        <p>a</p>
+        <p></p>
       </div>
     </div>
   </body>
