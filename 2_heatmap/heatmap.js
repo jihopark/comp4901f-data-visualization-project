@@ -110,7 +110,7 @@
                         .attr("class", "chart")
                         .attr("width", cols*col_width + horizontal_margin*2)
                         .attr("height", rows*row_height + vertical_margin*2);
-    var max = d3.max(array), min = d3.min(array);
+    var max = 48000, min = 0;
     var color = d3.scale.linear()
                 .domain([min, max])
                 .range(["#FFF0F0", "#8b0000"]);
