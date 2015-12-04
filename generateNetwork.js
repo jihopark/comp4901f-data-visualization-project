@@ -16,7 +16,7 @@
     generateGraph(data["Fri"], data["Fri"][1000]["Timestamp"], data["Fri"][2000]["Timestamp"], ["1075494"], ["Wet Land", "Coaster Alley"], renderGraph);
     // or
     generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][10]["Timestamp"], null, null, renderGraph);
-    generateGraph(data["Sat"], data["Sat"][0]["Timestamp"], data["Sat"][data["Sat"].length-1]["Timestamp"], ["external"], null, sortByFrequency);
+    generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][data["Sun"].length-1]["Timestamp"], ["1711922"], null, sortByFrequency);
     /*generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][data["Fri"].length-1]["Timestamp"], null, null, friday);
     generateGraph(data["Sat"], data["Sat"][0]["Timestamp"], data["Sat"][data["Sat"].length-1]["Timestamp"], null, null, saturday);
     generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][data["Sun"].length-1]["Timestamp"], null, null, sunday);*/
