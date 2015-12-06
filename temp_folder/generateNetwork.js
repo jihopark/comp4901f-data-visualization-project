@@ -8,89 +8,88 @@
     console.log(nodes);
     console.log("edges count = "+edges.length);
     console.log(edges);
-
-
-    var width = 2000,
-    height = 1500;
-
-  var color = d3.scale.category20();
-
-var force = d3.layout.force()
-    .charge(-40)
-    .linkDistance(30)
-    //.linkDistance(function(d) {return 2000/(d.frequency)})
-    .size([width, height]);
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-    force
-      .nodes(nodes)
-      .links(edges)
-      .start();
-
-  var link = svg.selectAll(".link")
-      .data(edges)
-    .enter().append("line")
-      .attr("class", "link")
-      //.style("stroke-linecap", "round")
-      
-      //.style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
-
-
-  var node = svg.selectAll(".node")
-      .data(nodes)
-    .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", function(d) { return Math.sqrt((d.sendFrequency)+(d.receiveFrequency)); })         //***************** specify Node Size
-      .style("fill", function(d) { return color(d.groupColor); })  //***************** specify Color d.group
-      .call(force.drag);
-    node.append("title")
-      .text(function(d) { return "ID: "+d.id+"\nsendFrequency: "+d.sendFrequency+"\nreceiveFrequency: "+d.receiveFrequency+"\ncolor: "+d.groupColor; });
-
-  force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-
-        
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-  
-  });
   }
 
   // TODO: this is just an example usage
   //function generateGraph(data, startTime, endTime, idList, locationList, callback)
   function dataHandler() {
-    ///////////////////////////////
-    var DAY="Fri";
-    
-    var startTimeHr=8;
-    var startTimeMin=0;
-    var endTimeHr=8;
-    var endTimeMin=30;
-
-    var idList=null;
-    var locationList=null;
-    var exclusionList=['839736','1278894','external'];
-    ////////////////////////////////
-    
-    var dayStart = d3.time.day(new Date(data[DAY][0]["Timestamp"]));
-    var startTime = d3.time.minute.offset(dayStart, (startTimeHr *60 + startTimeMin));
-    var endTime = d3.time.minute.offset(dayStart, (endTimeHr *60 + endTimeMin));
-    
-    
-    generateGraph(data[DAY], startTime, endTime, idList, exclusionList, locationList, renderGraph);
+    generateGraph(data["Fri"], data["Fri"][1000]["Timestamp"], data["Fri"][2000]["Timestamp"], ["1075494"], ["Wet Land", "Coaster Alley"], renderGraph);
     // or
-    //generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][10]["Timestamp"], null, null, renderGraph);
+    generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][10]["Timestamp"], null, null, renderGraph);
+    generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][data["Sun"].length-1]["Timestamp"], ["1711922"], null, sortByFrequency);
+    /*generateGraph(data["Fri"], data["Fri"][0]["Timestamp"], data["Fri"][data["Fri"].length-1]["Timestamp"], null, null, friday);
+    generateGraph(data["Sat"], data["Sat"][0]["Timestamp"], data["Sat"][data["Sat"].length-1]["Timestamp"], null, null, saturday);
+    generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][data["Sun"].length-1]["Timestamp"], null, null, sunday);*/
   }
 
 
+  function sortByFrequency(nodes, edges) {
+    console.log("sortByFrequency");
+    console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+    nodes.sort(function (a,b) {
+      return b.sendFrequency - a.sendFrequency;
 
+    })
+    console.log("sorted nodes count = "+nodes.length);
+    console.log(nodes);
+  }
 
+  var fridayNodes = [];
+  var saturdayNodes = [];
+  var sundayNodes = [];
+  var commonIdList = [];
+
+  function friday(nodes, edges) {
+    fridayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+  }
+  function saturday(nodes, edges) {
+    saturdayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+  }
+  function sunday(nodes, edges) {
+    sundayNodes = nodes;console.log("nodes count = "+nodes.length);
+    console.log(nodes);
+    console.log("edges count = "+edges.length);
+    console.log(edges);
+    computeCommonIds();
+  }
+
+  function computeCommonIds() {
+    for (var i=0; i<fridayNodes.length; ++i) {
+      var appearOnSaturday = false;
+      var appearOnSunday = false;
+      // look for same node in saturday
+      for (var j=0; j<saturdayNodes.length; ++j) {
+        if (fridayNodes[i].id === saturdayNodes[j].id) {
+          appearOnSaturday = true;
+          break;
+        }
+      }
+
+      // look for same node in sunday
+      for (var j=0; j<sundayNodes.length; ++j) {
+        if (fridayNodes[i].id === sundayNodes[j].id) {
+          appearOnSunday = true;
+          break;
+        }
+      }
+
+      if (appearOnSaturday==true && appearOnSunday==true) {
+        commonIdList.push(fridayNodes[i].id);
+      }
+
+    }
+    console.log(commonIdList);
+    document.getElementById("data-container").innerHTML=JSON.stringify(commonIdList)
+  }
 
 
 
@@ -129,7 +128,7 @@ var svg = d3.select("body").append("svg")
   // example 1: generateGraph(data["Fri"], timeStamp, null, null);
   // example 2: generateGraph(data["Fri"], timeStamp, ["1234","4534"], null);
   // data, startTime and endTime need to be passed. Oter parameters are used as additional filters
-  function generateGraph(data, startTime, endTime, idList, exclusionList, locationList, callback) {
+  function generateGraph(data, startTime, endTime, idList, locationList, callback) {
 
     var nodes = [];
     var edges = [];
@@ -140,16 +139,14 @@ var svg = d3.select("body").append("svg")
     /*
       Part 1: generate nodes
     */
-    function VisitorObject(id, groupNum, firstSeen,isSender, location, to){
+    function VisitorObject(id,firstSeen,isSender, location, to){
       var retObject = {
                         id: id,
                         firstSeen: firstSeen, //timestamp
                         lastSeen: firstSeen,  //timestamp
-                        groupColor: groupNum,         //group Num
                         sendFrequency: 0,
                         receiveFrequency: 0,
                         sendLocationFrequency: {"Kiddie Land": 0, "Entry Corridor": 0, "Tundra Land": 0, "Wet Land": 0, "Coaster Alley": 0}
-
                       };
       if (isSender) {
         retObject.sendFrequency = 1;
@@ -163,42 +160,20 @@ var svg = d3.select("body").append("svg")
 
     //console.log("StartTime = "+new Date(startTime));
     var indexOnStartTime = 0;
-    while ((new Date(data[indexOnStartTime]["Timestamp"]))<startTime) {
-      console.log("indexOnStart");
+    while ((new Date(data[indexOnStartTime]["Timestamp"])).getTime()<(new Date(startTime)).getTime()) {
       indexOnStartTime++;
     }
-    console.log(new Date(data[indexOnStartTime]["Timestamp"]));
     var indexOnEndTime = indexOnStartTime;
-    while ((indexOnEndTime<data.length-1) && (new Date(data[indexOnEndTime]["Timestamp"]))<=endTime) {
-      console.log("indexOnEnd");
+    while (data[indexOnEndTime] && (new Date(data[indexOnEndTime]["Timestamp"])).getTime()<=(new Date(endTime)).getTime()) {
       indexOnEndTime++;
     }
-    console.log(new Date(data[indexOnEndTime]["Timestamp"]));
+
     //console.log("indexOnStartTime = "+indexOnStartTime);
     //console.log("indexOnEndTime = "+indexOnEndTime);
 
     // for each row in table
     for (var i=indexOnStartTime; i<indexOnEndTime; ++i) {
-
-      var isStaff=false;
-      if(data[i].from ==="1278894" || data[i].to==="1278894"){
-          isStaff =true;
-      }
       // filter out data by idList and locationList
-      if(exclusionList){
-        var exclusionFound = false;
-        for(var j=0; j<exclusionList.length; ++j){
-          if(exclusionList[j]===data[i].from || exclusionList[j]===data[i].to){
-            exclusionFound=true;
-            break;
-          }
-        }
-        // skip this row
-        if(exclusionFound){
-          continue;
-        }
-      }
-
       if (idList) {
         var idFound = false;
         for (var j=0; j<idList.length; ++j) {
@@ -240,10 +215,7 @@ var svg = d3.select("body").append("svg")
       }
       if (isIdUnique) {
         // register as sender
-        if(!isStaff)
-          nodes.push(VisitorObject(data[i].from, 3, data[i].Timestamp, true, data[i].location, data[i].to));
-        else
-          nodes.push(VisitorObject(data[i].from, 1, data[i].Timestamp, true, data[i].location, data[i].to));
+        nodes.push(VisitorObject(data[i].from, data[i].Timestamp, true, data[i].location, data[i].to));
       }
 
       isIdUnique = true;
@@ -258,16 +230,13 @@ var svg = d3.select("body").append("svg")
       }
       if (isIdUnique) {
         // register as recipient
-        if(!isStaff)
-          nodes.push(VisitorObject(data[i].to, 3, data[i].Timestamp, false, data[i].location));
-        else
-          nodes.push(VisitorObject(data[i].to, 1, data[i].Timestamp, false, data[i].location));
+        nodes.push(VisitorObject(data[i].to, data[i].Timestamp, false, data[i].location));
       }
 
-      //if (i%1000==0)    // just to keep up with the progress of algorithm
-      //  console.log("nodes count so far = "+nodes.length);
+      if (i%10000==0)    // just to keep up with the progress of algorithm
+        console.log("nodes count so far = "+nodes.length);
     }
-    console.log("nodes count = "+nodes.length);
+    //console.log("nodes count = "+nodes.length);
     //console.log(nodes);
 
 
@@ -343,11 +312,11 @@ var svg = d3.select("body").append("svg")
       if (newEdge)
         edges.push(D3Edge(sourceIndex, targetIndex, 1));
 
-      //if (i%1000==0)    // just to keep up with the progress of algorithm
-      //  console.log("edges count so far = "+d3Edges.length);
+      if (i%10000==0)    // just to keep up with the progress of algorithm
+        console.log("edges count so far = "+edges.length);
     }
 
-    console.log("edges count = "+edges.length);
+    //console.log("edges count = "+edges.length);
     //console.log(edges);
     if (callback) {
       callback(nodes, edges);
