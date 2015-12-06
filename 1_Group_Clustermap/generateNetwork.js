@@ -10,8 +10,8 @@
     console.log(edges);
 
 
-    var width = 2000,
-    height = 1500;
+    var width = 1600,
+    height = 1000;
 
   function colores(n) {
     var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
@@ -21,8 +21,8 @@
 
 var force = d3.layout.force()
     .charge(-40)
-    .linkDistance(30)
-    //.linkDistance(function(d) {return 2000/(d.frequency)})
+    //.linkDistance(30)
+    .linkDistance(function(d) {return 2000/(d.frequency)})
     .size([width, height]);
 
 var svg = d3.select("body").append("svg")
@@ -40,7 +40,7 @@ var svg = d3.select("body").append("svg")
       .attr("class", "link")
       //.style("stroke-linecap", "round")
 
-      //.style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
+      .style("stroke-width", function(d) { return Math.sqrt(d.frequency); }); //*********** specify stroke width
 
 
   var node = svg.selectAll(".node")
