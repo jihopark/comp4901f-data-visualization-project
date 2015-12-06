@@ -1,7 +1,7 @@
 var vis = d3.select("#visualisation");
 function cell_dim(total, cells) { return Math.floor(total/cells) }
-var total_height = 400;
-var total_width = 700;
+var total_height = 500;
+var total_width = 1000;
 var horizontal_margin = 100, vertical_margin = 25;
 var cols = 30; // 1hr split into 30 min blocks
 var rows = 5; //locations.length; // number of location
@@ -72,10 +72,10 @@ var col_width = cell_dim(total_width, cols);
         vis.append("rect")
             .attr("x", xScale((new Date(data[day][i].Timestamp)).getTime()-startTimeMillis))
             .attr("y", yScale(locationId))
-            .attr("width", 2)
+            .attr("width", 1)
             .attr("height", yScale(0.7))
-            .attr('opacity',0.4)
-            .attr('fill',"#0000FF");
+            .attr('opacity',0.3)
+            .attr('fill',"#00FF00");
       }
       else if (targetId===data[day][i].to) {
         targetIdCount++;
@@ -89,9 +89,9 @@ var col_width = cell_dim(total_width, cols);
         vis.append("rect")
             .attr("x", xScale((new Date(data[day][i].Timestamp)).getTime()-startTimeMillis))
             .attr("y", yScale(locationId))
-            .attr("width", 2)
+            .attr("width", 1)
             .attr("height", yScale(0.7))
-            .attr('opacity',0.4)
+            .attr('opacity',0.3)
             .attr('fill',"#FF0000");
       }
 
@@ -136,6 +136,7 @@ var col_width = cell_dim(total_width, cols);
   document.getElementById("button").addEventListener("click", function() {
       console.log(document.getElementById("inputDay").value+", "+document.getElementById("inputId").value);
       render(document.getElementById("inputDay").value, document.getElementById("inputId").value);
+      document.getElementById("title").innerHTML = "Call history of id="+document.getElementById("inputId").value+" on "+document.getElementById("inputDay").value+"day";
   }, false);
 
 

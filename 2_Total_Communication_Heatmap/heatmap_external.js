@@ -117,7 +117,7 @@
     console.log(min);
     var color = d3.scale.linear()
                 .domain([min, max])
-                .range(["#FFF0F0", "#3366ff"]);
+                .range(["#FFF0F0", "#990099"]);
 
     color_chart.selectAll("rect")
               .data(array)
