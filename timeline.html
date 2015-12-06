@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/justified-nav/justified-nav.css" rel="stylesheet">
+
+    <style>
+      body {
+        margin:0 auto;
+        position:relative;
+        width:958px;
+        font: sans-serif;
+      }
+      .chart rect {
+        stroke: white;
+      }
+
+      #svg-container {
+        margin:0 auto;
+      }
+
+      #scale-explanation text {
+        font: 15px sans-serif;
+      }
+
+      .axis text {
+        font: 10px sans-serif;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+    </style>
+
+</head>
+
+<body>
+  Day (Fri, Sat, Sun):<br>
+  <input type="text" id="inputDay">
+  <br>
+  ID (ex:325528):<br>
+  <input type="text" id="inputId">
+  <br><br>
+  <button type="button" id="button">draw chart</button>
+  <div class="container">
+
+      <div class="jumbotron">
+
+          <svg id="visualisation" width="1000" height="500"></svg>
+          <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+          <script type="text/javascript" src="timeline.js"></script>
+      </div>
+
+  </div>
+
+</body>
+</html>
