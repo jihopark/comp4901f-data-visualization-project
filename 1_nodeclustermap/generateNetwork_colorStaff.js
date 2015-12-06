@@ -10,15 +10,18 @@
     console.log(edges);
 
 
-    var width = 2000,
-    height = 1500;
+    var width = 3000,
+    height = 2000;
 
-  var color = d3.scale.category20();
+function colores(n) {
+    var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+    return colores_g[n % colores_g.length];
+  }
 
 var force = d3.layout.force()
-    .charge(-40)
+    .charge(-30)
     .linkDistance(30)
-    //.linkDistance(function(d) {return 2000/(d.frequency)})
+    //.linkDistance(function(d) {return 1000/(d.frequency)})
     .size([width, height]);
 
 var svg = d3.select("body").append("svg")
@@ -43,8 +46,9 @@ var svg = d3.select("body").append("svg")
       .data(nodes)
     .enter().append("circle")
       .attr("class", "node")
+      .attr("id", function(d) {return d.id;})
       .attr("r", function(d) { return Math.sqrt((d.sendFrequency)+(d.receiveFrequency)); })         //***************** specify Node Size
-      .style("fill", function(d) { return color(d.groupColor); })  //***************** specify Color d.group
+      .style("fill", function(d) { return colores(d.groupColor); })  //***************** specify Color d.group
       .call(force.drag);
     node.append("title")
       .text(function(d) { return "ID: "+d.id+"\nsendFrequency: "+d.sendFrequency+"\nreceiveFrequency: "+d.receiveFrequency+"\ncolor: "+d.groupColor; });
@@ -60,22 +64,43 @@ var svg = d3.select("body").append("svg")
         .attr("cy", function(d) { return d.y; });
   
   });
+
+  d3.select("#thresholdSlider").on("change", function(thresh) {
+    console.log("THRESHOLD");
+      var temp_edges = edges.splice(0, edges.length);
+      for (var i = 0; i < temp_edges.length; i++) {
+        if (temp_edges[i].frequency > thresh) {edges.push(temp_edges[i]);}
+      }
+      restart();
+  });
+
+  //Restart the visualisation after any node and link changes
+  function restart() {
+    console.log("Restart");
+    link = link.data(edges);
+    link.exit().remove();
+    link.enter().insert("line", ".node").attr("class", "link");
+    node = node.data(nodes);
+    node.enter().insert("circle", ".cursor").attr("class", "node").attr("r", 5).call(force.drag);
+    force.start();
+  }
   }
 
   // TODO: this is just an example usage
   //function generateGraph(data, startTime, endTime, idList, locationList, callback)
   function dataHandler() {
     ///////////////////////////////
-    var DAY="Fri";
+    var DAY="Sun";
     
-    var startTimeHr=8;
+    var startTimeHr=10;
     var startTimeMin=0;
-    var endTimeHr=8;
+    var endTimeHr=11;
     var endTimeMin=30;
 
-    var idList=null;
+    var idList=['1278894','839736'];
     var locationList=null;
-    var exclusionList=['839736','1278894','external'];
+    var exclusionList= null;
+    //['839736','1278894','external'];
     ////////////////////////////////
     
     var dayStart = d3.time.day(new Date(data[DAY][0]["Timestamp"]));
@@ -87,17 +112,6 @@ var svg = d3.select("body").append("svg")
     // or
     //generateGraph(data["Sun"], data["Sun"][0]["Timestamp"], data["Sun"][10]["Timestamp"], null, null, renderGraph);
   }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -178,12 +192,35 @@ var svg = d3.select("body").append("svg")
     //console.log("indexOnEndTime = "+indexOnEndTime);
 
     // for each row in table
+    var staffList=[];
+
     for (var i=indexOnStartTime; i<indexOnEndTime; ++i) {
 
-      var isStaff=false;
-      if(data[i].from ==="1278894" || data[i].to==="1278894"){
-          isStaff =true;
+      var isStaffIDUnique=true;
+      if(data[i].from =='1278894'){
+        isStaffIDUnique=true;
+          for(var j=0; j<staffList.length; ++j){
+            if(staffList[j]==data[i].to){
+              //not unique
+              isStaffIDUnique=false;
+            }
+          }
+          if(isStaffIDUnique){
+            staffList.push(data[i].to);
+          }
       }
+      else if(data[i].to=='1278894'){
+        isStaffIDUnique=true;
+        for(var j=0; j<staffList.length; ++j){
+          if(staffList[j]==data[i].from){
+            isStaffIDUnique=false;
+          }
+        }
+        if(isStaffIDUnique){
+          staffList.push(data[i].from);
+        }
+      }
+
       // filter out data by idList and locationList
       if(exclusionList){
         var exclusionFound = false;
@@ -235,15 +272,33 @@ var svg = d3.select("body").append("svg")
           nodes[j]["lastSeen"] = data[i].Timestamp;
           nodes[j]["sendFrequency"] +=1;
           nodes[j]["sendLocationFrequency"][data[i].location] +=1;
+
+          var isStaff=false;
+          for(var k=0; k<staffList.length; ++k){
+            if(staffList[k]==data[i].from){
+              isStaff=true;
+            }
+          }
+          if(isStaff){
+            nodes[j]["groupColor"]= 1;
+            //d3.select("#"+nodes[j].id).attr("color",);
+          }
           break;
         }
       }
       if (isIdUnique) {
         // register as sender
+        var isStaff=false;
+        for(var j=0; j<staffList.length; ++j){
+          if(staffList[j]==data[i].from)
+            isStaff=true;
+        }
+        
         if(!isStaff)
-          nodes.push(VisitorObject(data[i].from, 3, data[i].Timestamp, true, data[i].location, data[i].to));
+          nodes.push(VisitorObject(data[i].from, 0, data[i].Timestamp, true, data[i].location, data[i].to));
         else
           nodes.push(VisitorObject(data[i].from, 1, data[i].Timestamp, true, data[i].location, data[i].to));
+        
       }
 
       isIdUnique = true;
@@ -253,21 +308,40 @@ var svg = d3.select("body").append("svg")
           isIdUnique = false;
           nodes[j]["lastSeen"] = data[i].Timestamp;
           nodes[j]["receiveFrequency"] +=1;
+
+          var isStaff=false;
+          for(var k=0; k<staffList.length; ++k){
+            if(staffList[k]==data[i].to){
+              isStaff=true;
+            }
+          }
+          if(isStaff){
+            nodes[j]["groupColor"]= 1;
+          }
           break;
         }
       }
       if (isIdUnique) {
         // register as recipient
+
+        var isStaff=false;
+        for(var j=0; j<staffList.length;++j){
+          if(staffList[j]==data[i].to)
+            isStaff=true;
+        }
+        
         if(!isStaff)
-          nodes.push(VisitorObject(data[i].to, 3, data[i].Timestamp, false, data[i].location));
+          nodes.push(VisitorObject(data[i].to, 0, data[i].Timestamp, false, data[i].location));
         else
           nodes.push(VisitorObject(data[i].to, 1, data[i].Timestamp, false, data[i].location));
+        
       }
 
       //if (i%1000==0)    // just to keep up with the progress of algorithm
       //  console.log("nodes count so far = "+nodes.length);
     }
     console.log("nodes count = "+nodes.length);
+    console.log("staffList: " +staffList);
     //console.log(nodes);
 
 
